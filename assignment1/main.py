@@ -71,7 +71,7 @@ def data_iter(data, batch_size, shuffle=True):
 
 def pad_sentences(sents, pad_id):
     """
-    Adding pad_id to sentences in a mini-batch to ensure that 
+    Adding pad_id to sentences in a mini-batch to ensure that
     all augmented sentences in a mini-batch have the same word length.
     Args:
         sents: list(list(int)), a list of a list of word ids
@@ -79,7 +79,13 @@ def pad_sentences(sents, pad_id):
     Return:
         aug_sents: list(list(int)), |s_1| == |s_i|, for s_i in sents
     """
-    raise NotImplementedError()
+    max_seq_length=-1
+    for sent in sents:
+        max_seq_length = max(len(sent), max_seq_length)
+    for sent in sents:
+        while(len(sent) < max_seq_length):
+            sent.append(pad_id)
+    return sents
 
 def compute_grad_norm(model, norm_type=2):
     """
@@ -133,6 +139,7 @@ def main():
     _seed = os.environ.get("MINNN_SEED", 12341)
     random.seed(_seed)
     np.random.seed(_seed)
+    torch.manual_seed(_seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Read datasets
@@ -197,7 +204,7 @@ def main():
 
             if train_iter % args.eval_niter == 0:
                 print(f'Evaluate dev data:')
-                dev_accuracy = evaluate(dev_data, model, device) 
+                dev_accuracy = evaluate(dev_data, model, device)
                 if dev_accuracy > best_records[1]:
                     print(f'  -Update best model at {train_iter}, dev accuracy={dev_accuracy:.4f}')
                     best_records = (train_iter, dev_accuracy)

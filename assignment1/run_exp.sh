@@ -1,5 +1,5 @@
 # Step 0. Change this to your campus ID
-CAMPUSID='9xx1234567'
+CAMPUSID='MyCampusID'
 mkdir -p $CAMPUSID
 
 # Step 1. (Optional) Any preprocessing step, e.g., downloading pre-trained word embeddings
@@ -8,7 +8,7 @@ mkdir -p $CAMPUSID
 # Step 2. Train models on two datasets.
 ##  2.1. Run experiments on SST
 PREF='sst'
-python main.py \
+python3 main.py \
     --train "data/${PREF}-train.txt" \
     --dev "data/${PREF}-dev.txt" \
     --test "data/${PREF}-test.txt" \
@@ -18,7 +18,7 @@ python main.py \
 
 ##  2.2 Run experiments on CF-IMDB
 PREF='cfimdb'
-python main.py \
+python3 main.py \
     --train "data/${PREF}-train.txt" \
     --dev "data/${PREF}-dev.txt" \
     --test "data/${PREF}-test.txt" \
@@ -33,5 +33,5 @@ for file in 'main.py' 'model.py' 'vocab.py' 'setup.py'; do
 	cp $file ${CAMPUSID}/
 done
 ##  3.2. Compress the $CAMPUSID folder to $CAMPUSID.zip (containing only .py/.txt/.pdf/.sh files)
-python prepare_submit.py ${CAMPUSID} ${CAMPUSID}
+python3 prepare_submit.py ${CAMPUSID} ${CAMPUSID}
 ##  3.3. Submit the zip file to Canvas (https://canvas.wisc.edu/courses/292771/assignments)! Congrats!

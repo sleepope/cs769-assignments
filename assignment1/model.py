@@ -37,7 +37,7 @@ def load_embedding(vocab, emb_file, emb_size):
         emb_file: (string), the path to the embdding file for loading
         emb_size: (int), the embedding size (e.g., 300, 100) depending on emb_file
     Return:
-        emb: (np.array), embedding matrix of size (|vocab|, emb_size) 
+        emb: (np.array), embedding matrix of size (|vocab|, emb_size)
     """
     raise NotImplementedError()
 
@@ -45,18 +45,24 @@ def load_embedding(vocab, emb_file, emb_size):
 class DanModel(BaseModel):
     def __init__(self, args, vocab, tag_size):
         super(DanModel, self).__init__(args, vocab, tag_size)
+        self.args = args
+        self.vocab_size = len(vocab)
+        self.tag_size = tag_size
         self.define_model_parameters()
-        self.init_model_parameters()
+        # self.init_model_parameters()
 
         # Use pre-trained word embeddings if emb_file exists
         if args.emb_file is not None:
             self.copy_embedding_from_numpy()
 
-    def define_model_parameters():
+    def define_model_parameters(self):
         """
         Define the model's parameters, e.g., embedding layer, feedforward layer.
         """
-        raise NotImplementedError()
+        self.fc = nn.Linear(self.vocab_size, 1024)
+        self.activation = nn.ReLU()
+        self.dropout = nn.Dropout(self.args.hid_drop)
+        self.weight = nn.Linear(1024, self.tag_size)
 
     def init_model_parameters(self):
         """
@@ -75,10 +81,20 @@ class DanModel(BaseModel):
         Compute the unnormalized scores for P(Y|X) before the softmax function.
         E.g., feature: h = f(x)
               scores: scores = w * h + b
-              P(Y|X) = softmax(scores)  
+              P(Y|X) = softmax(scores)
         Args:
             x: (torch.LongTensor), [batch_size, seq_length]
         Return:
             scores: (torch.FloatTensor), [batch_size, ntags]
         """
-        raise NotImplementedError()
+
+        bow_vec = torch.zeros(len(x), self.vocab_size)
+        for batch_idx, sent in enumerate(x):
+            for word in sent:
+                bow_vec[batch_idx][word] += 1
+
+        x = self.fc(bow_vec)
+        x = self.activation(x)
+        x = self.dropout(x)
+        scores = self.weight(x)
+        return scores
