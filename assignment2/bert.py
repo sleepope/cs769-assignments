@@ -27,7 +27,7 @@ class BertSelfAttention(nn.Module):
     # the corresponding linear_layer of k, v, q are used to project the hidden_state (x)
     bs, seq_len = x.shape[:2]
     proj = linear_layer(x)
-    # next, we need to produce multiple heads for the proj 
+    # next, we need to produce multiple heads for the proj
     # this is done by spliting the hidden state to self.num_attention_heads, each of size self.attention_head_size
     proj = proj.view(bs, seq_len, self.num_attention_heads, self.attention_head_size)
     # by proper transpose, we have proj of [bs, num_attention_heads, seq_len, attention_head_size]
@@ -36,15 +36,15 @@ class BertSelfAttention(nn.Module):
 
   def attention(self, key, query, value, attention_mask):
     # each attention is calculated following eq (1) of https://arxiv.org/pdf/1706.03762.pdf
-    # attention scores are calculated by multiply query and key 
+    # attention scores are calculated by multiply query and key
     # and get back a score matrix S of [bs, num_attention_heads, seq_len, seq_len]
     # S[*, i, j, k] represents the (unnormalized)attention score between the j-th and k-th token, given by i-th attention head
     # before normalizing the scores, use the attention mask to mask out the padding token scores
-    # Note again: in the attention_mask non-padding tokens with 0 and padding tokens with a large negative number 
+    # Note again: in the attention_mask non-padding tokens with 0 and padding tokens with a large negative number
 
     # normalize the scores
 
-    # multiply the attention scores to the value and get back V' 
+    # multiply the attention scores to the value and get back V'
 
     # next, we need to concat multi-heads and recover the original shape [bs, seq_len, num_attention_heads * attention_head_size = hidden_size]
     raise NotImplementedError
@@ -60,7 +60,7 @@ class BertSelfAttention(nn.Module):
     key_layer = self.transform(hidden_states, self.key)
     value_layer = self.transform(hidden_states, self.value)
     query_layer = self.transform(hidden_states, self.query)
-    # calculate the multi-head attention 
+    # calculate the multi-head attention
     attn_value = self.attention(key_layer, query_layer, value_layer, attention_mask)
     return attn_value
 
@@ -94,8 +94,8 @@ class BertLayer(nn.Module):
   def forward(self, hidden_states, attention_mask):
     """
     hidden_states: either from the embedding layer (first bert layer) or from the previous bert layer
-    as shown in the left of Figure 1 of https://arxiv.org/pdf/1706.03762.pdf 
-    each block consists of 
+    as shown in the left of Figure 1 of https://arxiv.org/pdf/1706.03762.pdf
+    each block consists of
     1. a multi-head attention layer (BertSelfAttention)
     2. a add-norm that takes the output of BertSelfAttention and the input of BertSelfAttention
     3. a feed forward layer
@@ -178,7 +178,7 @@ class BertModel(BertPreTrainedModel):
     """
     # get the extended attention mask for self attention
     # returns extended_attention_mask of [batch_size, 1, 1, seq_len]
-    # non-padding tokens with 0 and padding tokens with a large negative number 
+    # non-padding tokens with 0 and padding tokens with a large negative number
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
 
     # pass the hidden states through the encoder layers
